@@ -16,3 +16,14 @@ profile
 *.moved-aside
 DerivedData
 .idea/
+*.jpg
+*.tga
+*.tif
+*.png
+*.mov
+*.gif
+*.ttf
+*.otf
+*.sh
+Processing/*.js
+Fonts
