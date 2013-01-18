@@ -26,4 +26,5 @@ DerivedData
 *.otf
 *.sh
 Processing/*.js
+Processing/libraries/*
 Fonts
