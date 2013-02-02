@@ -1,0 +1,100 @@
+// # MyProcessingSketch
+// **Created By:** + tingham
+// **Created On:** + Fri Feb 01 2013
+// 
+
+int width = 512;
+int height = 512;
+int tick = 0;
+float edgeThreshold = 0.5;
+
+String inputName = "2913559033_2101d1d7a6_b.jpg";
+String outputName = "data/output/" + inputName + "." + System.currentTimeMillis() + "/";
+PImage input;
+
+color[] edgePixels = new color[width * height];
+
+void setup ()
+{
+	input = loadImage("data/input/" + inputName);	
+	input.loadPixels();
+
+	size(width, height);
+
+	float sc = 1.0;
+	if (input.width < width) {
+		sc = ((float)input.width / (float)width);
+	} else {
+		sc = ((float)width / (float)input.width);
+	}
+
+	translate(width / 2, height / 2);
+	scale(sc);
+	imageMode(CENTER);
+	image(input, 0, 0);
+
+	loadPixels();
+
+	processEdges();
+}
+
+void processEdges () {
+	for (int i = 0; i < edgePixels.length; i++) {
+		int x = i % width;
+		int y = i / height;
+
+		int left = (y * width + (x - 1));
+		int right = (y * width + (x + 1));
+
+		if (left < 0 || right < 0 ||
+			left >= pixels.length || right >= pixels.length) {
+			edgePixels[i] = 0;
+			continue;
+		} else {
+			float source = brightness(pixels[i]);
+			float dl = brightness(pixels[left]);
+			float dr = brightness(pixels[right]);
+
+			float lDiff = 0;
+			float rDiff = 0;
+
+			if (dl > source) {
+				lDiff = source / dl;
+			} else {
+				lDiff = dl / source;
+			}
+
+			if (dr > source) {
+				rDiff = source / dr;
+			} else {
+				rDiff = dr / source;
+			}
+
+			if (lDiff > edgeThreshold && rDiff > edgeThreshold) {
+				edgePixels[i] = 255;
+			} else {
+				edgePixels[i] = 0;
+			}
+		}
+	}
+}
+
+void draw ()
+{
+	for (int i = 0; i < edgePixels.length; i++) {
+		int x = i % width;
+		int y = i / width;
+		color mc = pixels[i];
+		color me = edgePixels[i];
+		color mo = color(red(mc) + red(me) / 2, green(mc) + green(me) / 2, blue(mc) + blue(me) / 2);
+		stroke(mo);
+		strokeWeight(1.1);
+		point(x, y);
+	}
+
+	long t = System.currentTimeMillis();
+	if (t % 90 == 0) {
+		// save(outputName + "s-" + t + ".jpg");
+	}
+}
+
