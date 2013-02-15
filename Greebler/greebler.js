@@ -1,6 +1,7 @@
-/*globals $ */
+/*globals $, Raphael */
 
-var canvas,
+var paper,
+	canvas,
 	context,
 	rects = [];
 
@@ -19,9 +20,15 @@ function Rect(x, y, w, h) {
 Rect.prototype.divide = function () {
 	"use strict";
 	var r = Math.random(),
-		result = [];
+		result = [],
+		i;
 
-	rects.slice(rects.length - 1, 1);
+	for (i = 0; i < rects.length; i++) {
+		if (rects[i].x === this.x &&
+				rects[i].y === this.y) {
+			rects.slice(i, 1);
+		}
+	}
 
 	if (r > 0.75) {
 		result.push(
@@ -60,55 +67,18 @@ Rect.prototype.divide = function () {
 				this.center.y - this.y
 			)
 		);
-
-	} else if (r > 0.25) {
-		result.push(
-			new Rect(
-				this.x,
-				this.y,
-				this.center.x - this.x,
-				this.center.y - this.y
-			)
-		);
-		result.push(
-			new Rect(
-				this.center.x,
-				this.y,
-				this.center.x - this.x,
-				this.center.y - this.y
-			)
-		);
-		result.push(
-			new Rect(
-				this.x,
-				this.center.y,
-				this.center.x - this.x,
-				this.center.y - this.y
-			)
-		);
-		result.push(
-			new Rect(
-				this.center.x,
-				this.center.y,
-				this.center.x - this.x,
-				this.center.y - this.y
-			)
-		);
 	}
+
 	return result;
 };
 
 $(document).ready(function () {
 	"use strict";
-	var i, w, r, subs;
-	canvas = document.getElementById("g");
-	context = canvas.getContext("2d");
+	var i, w, r, subs, bg;
 
-	canvas.width = "512";
-	canvas.height = "512";
-	
-	context.fillStyle = "#ffffff";
-	context.fillRect(0, 0, canvas.width, canvas.height);
+	paper = new Raphael("g", 512, 512);
+	bg = paper.rect(0, 0, 512, 512);
+	bg.attr("fill", "#fff");
 
 	w = 512;
 	r = new Rect(0, 0, 512, 512);
@@ -127,10 +97,7 @@ $(document).ready(function () {
 	}
 
 	for (i = 1; i < rects.length; i++) {
-		context.fillStyle = "#000000";
-		context.fillRect(rects[i].x + 1, rects[i].y + 1, rects[i].w - 2, rects[i].h - 2);
-		context.fillStyle = "#ff0000";
-		context.fillRect(rects[i].center.x - 1, rects[i].center.y - 1, 2, 2);
+		rects[i].rect = paper.rect(rects[i].x + 1, rects[i].y + 1, rects[i].w - 2, rects[i].h - 2).attr("fill", "none").attr("stroke", "#000");
 	}
 });
 
