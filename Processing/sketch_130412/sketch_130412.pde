@@ -13,15 +13,22 @@ ArrayList<Particle> particles;
 void setup ()
 {
 	size(width, height);
+}
+
+void draw ()
+{
+	background(255);
+
+	tick++;
 
 	particles = new ArrayList<Particle>();
 
 	int count = 720;
 	for (int i = 0; i < count; i++) {
-		float w = ((float)i / (float)count) * TWO_PI;
-		float n = noise((float)i / (float)count, 0) - 0.5;
-		float x = (width * 0.5) + (sin(w) * width * 0.4) + (n * width);
-		float y = (height * 0.5) + (cos(w) * height * 0.4) + (n * height);
+		float w = ((float)i / (float)count) + tick;
+		float n = noise((float)i / (float)count * 2, 0) - 0.5;
+		float x = (width * 0.5) + (sin(w) * width * 0.4) + (n * width * 0.25) + ((noise(w, w) * 50) - 25);
+		float y = (height * 0.5) + (cos(w) * height * 0.4) + (n * height * 0.25) + ((noise(w, w) * 50) - 25);
 
 		particles.add(
 			new Particle(
@@ -31,11 +38,6 @@ void setup ()
 			)
 		);
 	}
-}
-
-void draw ()
-{
-	background(255);
 
 	for (Particle p : particles) {
 		stroke(32);
