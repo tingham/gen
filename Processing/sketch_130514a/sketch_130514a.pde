@@ -6,6 +6,7 @@
 int width = 850;
 int height = 1100;
 int tick = 0;
+
 String outputName = "data/output/" + System.currentTimeMillis() + "/";
 
 Dot[] dots = new Dot[width * height];
@@ -13,7 +14,7 @@ int[] offsets = new int[] {-1, -width, -width + 1};
 
 void setup ()
 {
-	size(width, height);
+	size(width, height, P3D);
 
 	noiseDetail(8, 0.5);
 
@@ -55,7 +56,7 @@ void setup ()
 			n3 = lerp(n3, 1, f);
 		}
 
-		dots[i] = new Dot(n1, n2, n3);
+		dots[i] = new Dot(n1, n2, n3, (float)i / (float)(width * height));
 	}
 
 	thread("update");
@@ -67,23 +68,35 @@ void update () {
 			float f = random(0.25, 0.9);
 			for (int i = 0; i < width * height; i++) {
 				if (i > width && i < width * height) {
+                                        if (dots[i].power < 0) {
+                                          continue;
+                                        }
+                                        
+                                        
 					if (dots[i].r > dots[i - 1].r) {
-						Dot p = new Dot(dots[i].r, dots[i].g, dots[i].b);
-						dots[i].r = lerp(dots[i].r, dots[i - 1].r, random(f));
-						dots[i - 1].r = lerp(dots[i - 1].r, p.r, random(f));
+						Dot p = new Dot(dots[i].r, dots[i].g, dots[i].b, dots[i].power);
+						dots[i] = dots[i - 1];
+						dots[i - 1] = p;
+
+                                                dots[i].power -= 0.001;
+                                                dots[i - 1].power -= 0.001;
 					}
 					if (dots[i].g > dots[i - width].g) {
-						Dot u = new Dot(dots[i].r, dots[i].g, dots[i].b);
-						dots[i].b = lerp(dots[i].b, dots[i - width].b, random(f));
-						dots[i - width].g = lerp(dots[i - width].g, u.g, random(f));
+						Dot u = new Dot(dots[i].r, dots[i].g, dots[i].b, dots[i].power);
+						dots[i] = dots[i - width];
+						dots[i - width] = u;
+                                                dots[i].power -= 0.001;
+                                                dots[i - width].power -= 0.001;
 					}
 
 					int offset1 = offsets[(int)random(0, offsets.length)];
 
 					if (dots[i].b > dots[i + offset1].b) {
-						Dot ul = new Dot(dots[i].r, dots[i].g, dots[i].b);
-						dots[i].b = lerp(dots[i].b, dots[i + offset1].b, random(f));
-						dots[i + offset1].b = lerp(dots[i + offset1].b, ul.b, random(f));
+						Dot ul = new Dot(dots[i].r, dots[i].g, dots[i].b, dots[i].power);
+						dots[i] = dots[i + offset1];
+						dots[i + offset1] = ul;
+                                                dots[i].power -= 0.001;
+                                                dots[i + offset1].power -= 0.001;
 					}
 				}
 			}
@@ -110,10 +123,12 @@ void draw ()
 
 class Dot {
 	float r, g, b;
+        float power;
 
-	public Dot (float r, float g, float b) {
+	public Dot (float r, float g, float b, float power) {
 		this.r = r;
 		this.g = g;
 		this.b = b;
+                this.power = power;
 	}
 }

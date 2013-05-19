@@ -16,7 +16,7 @@ float highR, highG, highB = 0;
 
 void setup ()
 {
-	size(width, height);
+	size(width, height, P3D);
 
 	noiseDetail(8, 0.5);
 
