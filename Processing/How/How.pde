@@ -5,8 +5,8 @@
 
 import com.mutiny.*;
 
-int width = 768;
-int height = 1024;
+int width = 2176;
+int height = 2816;
 int div = 2;
 
 int tick = 0;
@@ -14,7 +14,7 @@ String outputName = "data/output/" + System.currentTimeMillis() + "/";
 
 Dot[] dots;
 
-float colorSnap = 16;
+float colorSnap = 100;
 
 void setup ()
 {
@@ -96,13 +96,13 @@ void generate () {
 		int y = (i - x) / (width / div);
 
 		float n1 = (float)((int)(noise(
-			(float)x / (float)(width / div),
-			(float)y / (float)(height / div)
+			((float)x / (float)(width / div)) * 5,
+			((float)y / (float)(height / div)) * 5
 		) * colorSnap)) / colorSnap;
 
 		float n2 = (float)((int)(noise(
-			(float)y / (float)(height / div),
-			(float)x / (float)(width / div)
+			((float)y / (float)(height / div)) * 5,
+			((float)x / (float)(width / div)) * 5
 		) * colorSnap)) / colorSnap;
 
 		float n3 = (float)((int)(noise(
