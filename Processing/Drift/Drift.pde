@@ -5,8 +5,9 @@
 
 import com.mutiny.*;
 
-int width = (int)(8.5 * 64);
-int height = (int)(11.0 * 64);
+int resolution = 64;
+int width = (int)(8.5 * resolution);
+int height = (int)(11.0 * resolution);
 
 int tick = 0;
 
@@ -37,16 +38,18 @@ float nx, ny;
 
 int radialEvals = 0;
 int noiseEvals = 0;
-int colorEvals = 2;
-int levelsEvals = 129;
-int intensityEvals = 0;
-int blurEvals = 128;
+int colorEvals = 0;
+int levelsEvals = 0;
 
 int minCircles = 255;
 int maxCircles = 255;
 
+int intensityEvals = 1;
+int blurEvals = 0;
+
 int breaking = 0;
 int usePower = 0;
+int center = 0;
 
 void setup ()
 {
@@ -63,9 +66,15 @@ void generate ()
 	noStroke();
 	for (int i = 0; i < random(minCircles, maxCircles); i++) {
 		fill(colors[(int)random(colors.length)]);
-		float x = random(width * 0.25, width * 0.75);
-		float y = random(height * 0.25, height * 0.75);
-		float r = random(64, 256);
+		float x, y;
+		if (center == 1) {
+			x = random(width * 0.25, width * 0.75);
+			y = random(height * 0.25, height * 0.75);
+		} else {
+			x = random(0, width);
+			y = random(0, height);
+		}
+		float r = random(resolution, resolution * 2);
 		for (int m = 0; m < (int)random(10); m++) {
 			ellipse(x, y, r, r);
 			r *= 0.75;
@@ -137,7 +146,7 @@ void update ()
 				}
 			}
 
-			Thread.sleep(10);
+			Thread.sleep(2);
 		} catch (Exception e) {
 
 		}
@@ -467,7 +476,9 @@ void draw ()
 {
 	background(0);
 
-	for (int i = 0; i < dots.length; i++) {
+	loadPixels();
+	for (int i = 0; i < dots.length; i += 8) {
+		/*
 		int x = i % width;
 		int y = (i - x) / width;
 
@@ -478,7 +489,17 @@ void draw ()
 		translate(x, y, 0);
 		rect(0, 0, 1, 1);
 		popMatrix();
+		*/
+		pixels[i] = dots[i].Color();
+		pixels[i + 1] = dots[i + 1].Color();
+		pixels[i + 2] = dots[i + 2].Color();
+		pixels[i + 3] = dots[i + 3].Color();
+		pixels[i + 4] = dots[i + 4].Color();
+		pixels[i + 5] = dots[i + 5].Color();
+		pixels[i + 6] = dots[i + 6].Color();
+		pixels[i + 7] = dots[i + 7].Color();
 	}
+	updatePixels();
 
 	/*
 	pushMatrix();
@@ -489,7 +510,7 @@ void draw ()
 	*/
 
 	long t = System.currentTimeMillis();
-	if (t % 10 == 0) {
+	if (t % 2 == 0) {
 		String fname = "r" + radialEvals + "-n" + noiseEvals + "-c" + colorEvals + "-l" + levelsEvals + "-minc" + minCircles + "-maxc" + maxCircles + "-b" + breaking + "-i" + intensityEvals + "-blur" + blurEvals + " -pow" + usePower;
 		save(outputName + fname + "-time-" + t + ".jpg");
 	}
