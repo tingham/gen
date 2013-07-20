@@ -39,7 +39,6 @@ void update ()
 		try {
 			if (tick % 90 == 0) {
 				int d = (int)random(dots.length);
-
 			}
 			Thread.sleep(30);
 		} catch (Exception e) {
