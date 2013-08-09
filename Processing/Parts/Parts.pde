@@ -42,15 +42,12 @@ void setup ()
 
 		if (x % sqsize == 0 && y % sqsize == 0) {
 			ArrayList<Dot> chunkDots = new ArrayList<Dot>();
-			// Dot[] chunkDots = new Dot[sqsize * sqsize];
 
 			for (int m = 0; m < sqsize * sqsize; m++) {
 				int ox = m % sqsize;
 				int oy = (m - ox) / sqsize;
 
 				int pixel = (oy + y) * img.width + (ox + x);
-
-				// println(pixel + " => " + img.pixels.length);
 
 				if (pixel < img.pixels.length) {
 					float r = red(img.pixels[pixel]) / 255;
