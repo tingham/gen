@@ -1,0 +1,4 @@
+boxAtPoint	Regression/Regression.pde	/^void boxAtPoint(float x, float y, float z, float n/
+draw	Regression/Regression.pde	/^void draw ()$/
+mouseDragged	Regression/Regression.pde	/^void mouseDragged ()$/
+setup	Regression/Regression.pde	/^void setup ()$/
