@@ -20,7 +20,7 @@ void draw ()
 	stroke(180);
 	strokeWeight(2);
 
-	curve(new PVector(width * 0.5, height * 0.5), 128, 0.01);
+	curve(new PVector(width * 0.5, height * 0.5), width * 0.5, 0.01);
 
 	long t = System.currentTimeMillis();
 	save(outputName + "s-" + t + ".jpg");
@@ -64,7 +64,7 @@ void curve (PVector center, float radius, float rate)
 
 	}
 
-	curve(f, radius / 2, rate * 0.25);
+	//curve(f, radius / 2, rate * 0.25);
 
 
 }
