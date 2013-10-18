@@ -38,14 +38,14 @@ float nx, ny;
 
 int radialEvals = 0;
 int noiseEvals = 0;
-int colorEvals = 0;
-int levelsEvals = 0;
+int colorEvals = 12;
+int levelsEvals = 16;
 
 int minCircles = 255;
 int maxCircles = 255;
 
-int intensityEvals = 1;
-int blurEvals = 0;
+int intensityEvals = 5;
+int blurEvals = 6;
 
 int breaking = 0;
 int usePower = 0;
@@ -96,6 +96,19 @@ void generate ()
 		dots[i] = new Dot(red(pixels[i]) / 255, green(pixels[i]) / 255, blue(pixels[i]) / 255, 1.0, ni);
 	}
 
+}
+
+void mouseDragged ()
+{
+	int _brushSize = 32;
+	for (int i = 0; i < _brushSize * _brushSize; i++) {
+		int x = i % _brushSize;
+		int y = (i - x) / _brushSize;
+		int index = (y + mouseY) * width + (x + mouseX);
+		if (index > 0 && index < dots.length) {
+			dots[index].r = 1.0;
+		}
+	}
 }
 
 void update ()

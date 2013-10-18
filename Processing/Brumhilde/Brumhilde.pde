@@ -7,6 +7,7 @@ import com.mutiny.*;
 int width = 1280;
 int height = 720;
 int brushSize = 64;
+float densityThreshold = 0.02;
 
 int tick = 0;
 String outputName = "data/output/" + System.currentTimeMillis() + "/";
@@ -41,7 +42,7 @@ void setup ()
 void fill ()
 {
 	loadPixels();
-	for (int i = 0; i < pixels.length; i++) {
+	for (int i = 0; i < paint.length; i++) {
 		int x = i % width;
 		int y = (i - x) / width;
 		int up = (y - 1) * width + x;
@@ -49,14 +50,39 @@ void fill ()
 		int left = y * width + (x - 1);
 		int right = y * width + (x + 1);
 
-		if (up > 0 && left > 0 && right < pixels.length && down > pixels.length) {
-			swapPixels(i, up);
-			swapPixels(i, left);
-			swapPixels(i, right);
-			swapPixels(i, down);
+		if (paint[i] == null) {
+			continue;
 		}
 
-		pixels[i] = paint[i].dot.Color();
+		if (up > 0 && left > 0 && right < pixels.length && down < pixels.length) {
+
+			if ((abs(paint[i].density - paint[up].density) > densityThreshold) ||
+				(abs(paint[i].density - paint[left].density) > densityThreshold) ||
+				(abs(paint[i].density - paint[right].density) > densityThreshold) ||
+				(abs(paint[i].density - paint[down].density) > densityThreshold)) {
+				continue;
+			}
+
+			if (paint[i].dot.Sum() > paint[up].dot.Sum()) {
+				swapPixels(left, right);
+			}
+
+			if (paint[i].dot.r > paint[right].dot.g) {
+				swapPixels(up, down);
+			}
+			
+			if (paint[i].dot.g > paint[down].dot.b) {
+				swapPixels(right, left);
+			}
+
+			if (paint[i].dot.b > paint[left].dot.r) {
+				swapPixels(down, up);
+			}
+
+			pixels[i] = paint[i].dot.Color();
+
+		}
+
 	}
 	updatePixels();
 }
@@ -79,9 +105,6 @@ void putPaint ()
 
 	noiseSeed((int)random(10) + 1);
 
-	// noiseSeed((int)random(100));
-	// noiseDetail(20, random(1));
-
 	float r = 0;
 	float g = 0;
 	float b = 0;
@@ -89,24 +112,24 @@ void putPaint ()
 	int lead = (int)random(3);
 	switch (key) {
 		case 'r':
-			r = random(0.5, 1.0);
-			g = random(0.25, 0.5);
-			b = random(0.25, 0.5);
+			r = random(0.75, 1.0);
+			g = random(0.35, 0.5);
+			b = random(0.35, 0.5);
 			break;
 		case 'g':
-			r = random(0.25, 0.5);
-			g = random(0.5, 1.0);
-			b = random(0.25, 0.5);
+			r = random(0.35, 0.5);
+			g = random(0.75, 1.0);
+			b = random(0.35, 0.5);
 			break;
 		case 'b':
-			r = random(0.25, 0.5);
-			g = random(0.25, 0.5);
-			b = random(0.5, 1.0);
+			r = random(0.35, 0.5);
+			g = random(0.35, 0.5);
+			b = random(0.75, 1.0);
 			break;
 		case 'w':
-			r = random(0.5, 1.0);
-			g = random(0.5, 1.0);
-			b = random(0.5, 1.0);
+			r = random(0.75, 1.0);
+			g = random(0.75, 1.0);
+			b = random(0.75, 1.0);
 			break;
 	}
 
@@ -143,7 +166,6 @@ void putPaint ()
 				p.dot.r = r * n1 * (paint[mouseY * width + mouseX].dot.r + 0.2);
 				p.dot.g = g * n2 * (paint[mouseY * width + mouseX].dot.g + 0.2);
 				p.dot.b = b * n3 * (paint[mouseY * width + mouseX].dot.b + 0.2);
-				p.density += 0.001;
 
 				p.viscosity = lerp(
 					p.viscosity,
@@ -164,67 +186,19 @@ void mouseDragged ()
 	putPaint();
 }
 
-void sortPixels ()
+void swapPixels (int a, int b)
 {
-	for (int i = 0; i < paint.length; i++) {
-		int x = i % width;
-		int y = (i - x) / width;
-		int up = (y - 1) * width + x;
-		int down = (y + 1) * width + x;
-		int left = y * width + (x - 1);
-		int right = y * width + (x + 1);
+	Paint p0 = paint[a];
+	Paint p1 = paint[b];
 
-		int moved = -1;
+	/*
+	float disp = random(p0.density * p1.viscosity * p0.viscosity) * 0.001;
+	p0.density -= disp;
+	p1.density += disp;
+	*/
 
-		if (up > 0 &&
-			down < paint.length &&
-			left > 0 &&
-			right < paint.length) {
-
-			if (paint[i].dot.r == 0.5 && paint[i].dot.g == 0.5 && paint[i].dot.b == 0.5) {
-				continue;
-			}
-
-			// only where densities are similar
-			moved = swapPixels(i, up);
-
-			if (moved == up) {
-				continue;
-			}
-
-			moved = swapPixels(i, left);
-
-			if (moved == left) {
-				continue;
-			}
-
-			moved = swapPixels(i, down);
-
-			if (moved == down) {
-				continue;
-			}
-
-			swapPixels(i, right);
-
-		}
-	}
-}
-
-int swapPixels (int a, int b)
-{
-	float diffDensity = abs(paint[a].density - paint[b].density);
-	if (diffDensity < 0.1 && paint[a].viscosity > paint[b].viscosity) {
-
-		Paint p0 = paint[a];
-		Paint p1 = paint[b];
-
-		paint[a] = p1;
-		paint[b] = p0;
-
-		return b;
-
-	}
-	return -1;
+	paint[a] = p1;
+	paint[b] = p0;
 }
 
 void draw ()
@@ -238,7 +212,7 @@ void draw ()
 	rect(0, 0, width, height);
 
 	long t = System.currentTimeMillis();
-	if (t % 30 == 0) {
+	if (t % 90 == 0) {
 		save(outputName + "s-" + t + ".jpg");
 	}
 }
