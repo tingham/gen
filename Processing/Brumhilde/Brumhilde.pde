@@ -8,6 +8,10 @@ int width = 1280;
 int height = 720;
 int brushSize = 64;
 float densityThreshold = 0.02;
+float r = 0;
+float g = 0;
+float b = 0;
+
 
 int tick = 0;
 String outputName = "data/output/" + System.currentTimeMillis() + "/";
@@ -56,13 +60,16 @@ void fill ()
 
 		if (up > 0 && left > 0 && right < pixels.length && down < pixels.length) {
 
+			/*
 			if ((abs(paint[i].density - paint[up].density) > densityThreshold) ||
 				(abs(paint[i].density - paint[left].density) > densityThreshold) ||
 				(abs(paint[i].density - paint[right].density) > densityThreshold) ||
 				(abs(paint[i].density - paint[down].density) > densityThreshold)) {
 				continue;
 			}
+			*/
 
+			/*
 			if (paint[i].dot.Sum() > paint[up].dot.Sum()) {
 				swapPixels(left, right);
 			}
@@ -78,9 +85,50 @@ void fill ()
 			if (paint[i].dot.b > paint[left].dot.r) {
 				swapPixels(down, up);
 			}
+			*/
+
+			int maxDensityIndex = i;
+			float maxDensity = 0f;
+			if (paint[up].density > maxDensity) {
+				maxDensity = paint[up].density;
+				maxDensityIndex = up;
+			}
+			if (paint[left].density > maxDensity) {
+				maxDensity = paint[left].density;
+				maxDensityIndex = left;
+			}
+			if (paint[right].density > maxDensity) {
+				maxDensity = paint[right].density;
+				maxDensityIndex = right;
+			}
+			if (paint[down].density > maxDensity) {
+				maxDensity = paint[down].density;
+				maxDensityIndex = down;
+			}
+
+			float shift = paint[maxDensityIndex].viscosity * paint[i].viscosity;
+			paint[i].dot.r = lerp(paint[i].dot.r, paint[maxDensityIndex].dot.r, shift);
+			paint[i].dot.g = lerp(paint[i].dot.g, paint[maxDensityIndex].dot.g, shift);
+			paint[i].dot.b = lerp(paint[i].dot.b, paint[maxDensityIndex].dot.b, shift);
+			paint[i].viscosity *= 0.99999;
 
 			pixels[i] = paint[i].dot.Color();
 
+			paint[up].dot.r = lerp(paint[up].dot.r, paint[i].dot.r, paint[up].viscosity * shift);
+			paint[up].dot.g = lerp(paint[up].dot.g, paint[i].dot.g, paint[up].viscosity * shift);
+			paint[up].dot.b = lerp(paint[up].dot.b, paint[i].dot.b, paint[up].viscosity * shift);
+
+			paint[right].dot.r = lerp(paint[right].dot.r, paint[i].dot.r, paint[right].viscosity * shift);
+			paint[right].dot.g = lerp(paint[right].dot.g, paint[i].dot.g, paint[right].viscosity * shift);
+			paint[right].dot.b = lerp(paint[right].dot.b, paint[i].dot.b, paint[right].viscosity * shift);
+
+			paint[left].dot.r = lerp(paint[left].dot.r, paint[i].dot.r, paint[left].viscosity * shift);
+			paint[left].dot.g = lerp(paint[left].dot.g, paint[i].dot.g, paint[left].viscosity * shift);
+			paint[left].dot.b = lerp(paint[left].dot.b, paint[i].dot.b, paint[left].viscosity * shift);
+
+			paint[down].dot.r = lerp(paint[down].dot.r, paint[i].dot.r, paint[down].viscosity * shift);
+			paint[down].dot.g = lerp(paint[down].dot.g, paint[i].dot.g, paint[down].viscosity * shift);
+			paint[down].dot.b = lerp(paint[down].dot.b, paint[i].dot.b, paint[down].viscosity * shift);
 		}
 
 	}
@@ -90,26 +138,12 @@ void fill ()
 void keyPressed ()
 {
 	if (key == '[') {
-		brushSize--;
+		brushSize -= 8;
 	}
 	if (key == ']') {
-		brushSize++;
+		brushSize += 8;
 	}
-}
 
-void putPaint ()
-{
-	int brush = brushSize + (int)random(brushSize / 4) + 1;
-	int half = brush / 2;
-	PVector source = new PVector(mouseX, mouseY);
-
-	noiseSeed((int)random(10) + 1);
-
-	float r = 0;
-	float g = 0;
-	float b = 0;
-
-	int lead = (int)random(3);
 	switch (key) {
 		case 'r':
 			r = random(0.75, 1.0);
@@ -122,16 +156,36 @@ void putPaint ()
 			b = random(0.35, 0.5);
 			break;
 		case 'b':
-			r = random(0.35, 0.5);
-			g = random(0.35, 0.5);
+			r = random(0.45, 0.5);
+			g = random(0.45, 0.5);
 			b = random(0.75, 1.0);
 			break;
 		case 'w':
-			r = random(0.75, 1.0);
-			g = random(0.75, 1.0);
-			b = random(0.75, 1.0);
+			r = random(0.85, 1.0);
+			g = random(0.85, 1.0);
+			b = random(0.85, 1.0);
 			break;
 	}
+
+	if (brushSize > 255) {
+		brushSize = 255;
+	}
+	if (brushSize < 0) {
+		brushSize = 4;
+	}
+}
+
+void putPaint ()
+{
+	int brush = brushSize + (int)random(4);
+	int half = brush / 2;
+	float brushFloat = 1.0 - ((float)brush / 255.0);
+	println(brushFloat);
+
+	PVector source = new PVector(mouseX, mouseY);
+
+	noiseSeed((int)random(10) + 1);
+	int lead = (int)random(3);
 
 	for (int x = 0; x < brush; x++) {
 		for (int y = 0; y < brush; y++) {
@@ -163,15 +217,13 @@ void putPaint ()
 				source.dist(destination) < (n * half)) {
 
 				Paint p = paint[indice];
-				p.dot.r = r * n1 * (paint[mouseY * width + mouseX].dot.r + 0.2);
-				p.dot.g = g * n2 * (paint[mouseY * width + mouseX].dot.g + 0.2);
-				p.dot.b = b * n3 * (paint[mouseY * width + mouseX].dot.b + 0.2);
 
-				p.viscosity = lerp(
-					p.viscosity,
-					(p.dot.r + p.dot.g + p.dot.b),
-					0.5
-				);
+				p.dot.r = lerp(r * n1, paint[indice].dot.r, 1.0 - brushFloat);
+				p.dot.g = lerp(g * n2, paint[indice].dot.g, 1.0 - brushFloat);
+				p.dot.b = lerp(b * n3, paint[indice].dot.b, 1.0 - brushFloat);
+
+				p.density = brushFloat;
+				p.viscosity = max(0.0, min(1.0, 1.0 - brushFloat));
 
 				paint[indice] = p;
 
