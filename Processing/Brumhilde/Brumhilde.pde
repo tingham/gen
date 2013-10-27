@@ -25,20 +25,31 @@ void setup ()
 
 	noiseDetail(20, 0.6);
 
+	PVector av = new PVector(width * 0.5, height * 0.5);
+
 	for (int i = 0; i < width * height; i++) {
 		int x = i % width;
 		int y = (i - x) / width;
 
+		PVector pv = new PVector(x, y);
+
 		float n1 = noise(
-				(float)x / (float)width,
-				(float)y / (float)height
+				(float)x / (float)width * 5,
+				(float)y / (float)height * 5
 			);
 		float n2 = noise(
-				(float)x / (float)width,
-				(float)y / (float)height
+				(float)(x + width) / (float)width * 7,
+				(float)y / (float)height * 7
+			);
+		float n3 = noise(
+				(float)(x + height) / (float)width * 9,
+				(float)y / (float)height * 9
 			);
 
-		paint[i] = new Paint(random(0.4, 0.6), random(0.4, 0.6), random(0.4, 0.6), n1, n2);
+		float distanceDriver = 1.0 - ((float)pv.dist(av) / (float)height);
+
+		paint[i] = new Paint(distanceDriver, n2, n3, n1, n2);
+
 	}
 	fill();
 }
@@ -47,6 +58,13 @@ void fill ()
 {
 	loadPixels();
 	for (int i = 0; i < paint.length; i++) {
+
+		kernel(i);
+
+		if (random(1.0) < 0.75) {
+			continue;
+		}
+
 		int x = i % width;
 		int y = (i - x) / width;
 		int up = (y - 1) * width + x;
@@ -60,35 +78,9 @@ void fill ()
 
 		if (up > 0 && left > 0 && right < pixels.length && down < pixels.length) {
 
-			/*
-			if ((abs(paint[i].density - paint[up].density) > densityThreshold) ||
-				(abs(paint[i].density - paint[left].density) > densityThreshold) ||
-				(abs(paint[i].density - paint[right].density) > densityThreshold) ||
-				(abs(paint[i].density - paint[down].density) > densityThreshold)) {
-				continue;
-			}
-			*/
-
-			/*
-			if (paint[i].dot.Sum() > paint[up].dot.Sum()) {
-				swapPixels(left, right);
-			}
-
-			if (paint[i].dot.r > paint[right].dot.g) {
-				swapPixels(up, down);
-			}
-			
-			if (paint[i].dot.g > paint[down].dot.b) {
-				swapPixels(right, left);
-			}
-
-			if (paint[i].dot.b > paint[left].dot.r) {
-				swapPixels(down, up);
-			}
-			*/
-
 			int maxDensityIndex = i;
 			float maxDensity = 0f;
+
 			if (paint[up].density > maxDensity) {
 				maxDensity = paint[up].density;
 				maxDensityIndex = up;
@@ -106,11 +98,11 @@ void fill ()
 				maxDensityIndex = down;
 			}
 
-			float shift = paint[maxDensityIndex].viscosity * paint[i].viscosity;
+			float shift = paint[maxDensityIndex].viscosity * paint[i].viscosity + 0.1;
+
 			paint[i].dot.r = lerp(paint[i].dot.r, paint[maxDensityIndex].dot.r, shift);
 			paint[i].dot.g = lerp(paint[i].dot.g, paint[maxDensityIndex].dot.g, shift);
 			paint[i].dot.b = lerp(paint[i].dot.b, paint[maxDensityIndex].dot.b, shift);
-			paint[i].viscosity *= 0.99999;
 
 			pixels[i] = paint[i].dot.Color();
 
@@ -130,6 +122,7 @@ void fill ()
 			paint[down].dot.g = lerp(paint[down].dot.g, paint[i].dot.g, paint[down].viscosity * shift);
 			paint[down].dot.b = lerp(paint[down].dot.b, paint[i].dot.b, paint[down].viscosity * shift);
 		}
+
 
 	}
 	updatePixels();
@@ -180,7 +173,6 @@ void putPaint ()
 	int brush = brushSize + (int)random(4);
 	int half = brush / 2;
 	float brushFloat = 1.0 - ((float)brush / 255.0);
-	println(brushFloat);
 
 	PVector source = new PVector(mouseX, mouseY);
 
@@ -218,9 +210,9 @@ void putPaint ()
 
 				Paint p = paint[indice];
 
-				p.dot.r = lerp(r * n1, paint[indice].dot.r, 1.0 - brushFloat);
-				p.dot.g = lerp(g * n2, paint[indice].dot.g, 1.0 - brushFloat);
-				p.dot.b = lerp(b * n3, paint[indice].dot.b, 1.0 - brushFloat);
+				//p.dot.r = lerp(r * n1, paint[indice].dot.r, 1.0 - brushFloat);
+				//p.dot.g = lerp(g * n2, paint[indice].dot.g, 1.0 - brushFloat);
+				//p.dot.b = lerp(b * n3, paint[indice].dot.b, 1.0 - brushFloat);
 
 				p.density = brushFloat;
 				p.viscosity = max(0.0, min(1.0, 1.0 - brushFloat));
@@ -242,16 +234,43 @@ void swapPixels (int a, int b)
 {
 	Paint p0 = paint[a];
 	Paint p1 = paint[b];
-
-	/*
-	float disp = random(p0.density * p1.viscosity * p0.viscosity) * 0.001;
-	p0.density -= disp;
-	p1.density += disp;
-	*/
-
 	paint[a] = p1;
 	paint[b] = p0;
 }
+
+void kernel (int i) {
+	int x = i % width;
+	int y = (i - x) / width;
+	PVector[] offsets = new PVector[] {
+			new PVector(-1, 0),
+			new PVector(-1, -1),
+			new PVector(0, -1),
+			new PVector(1, -1),
+			new PVector(1, 0),
+			new PVector(1, 1),
+			new PVector(0, 1),
+			new PVector(-1, 1)
+		};
+
+	int ro = offsets.length;
+	for (int o = 0; o < offsets.length; o++) {
+		ro--;
+		int index1 = (y + (int)offsets[o].y) * width + (x + (int)offsets[o].x);
+		int index2 = (y + (int)offsets[ro].y) * width + (x + (int)offsets[ro].x);
+		if (index1 > 0 && index1 < paint.length &&
+			index2 > 0 && index2 < paint.length) {
+			float f = abs(paint[index1].dot.Sum() - paint[index2].dot.Sum());
+			if (f > 0.125f) {
+				paint[i].dot.r += 0.01 * paint[i].viscosity;
+				paint[i].dot.g += 0.01 * paint[i].viscosity;
+				paint[i].dot.b += 0.01 * paint[i].viscosity;
+			}
+			
+		}
+	}
+
+}
+
 
 void draw ()
 {
