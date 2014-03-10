@@ -8,6 +8,8 @@
  * We do use processing to output the final image, obviously.
  **/
 
+import java.util.Date;
+
 // animation timer
 int tick = 0;
 
