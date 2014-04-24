@@ -77,15 +77,15 @@ void draw ()
 {
     tick++;
 
-    float s = sin(tick * 0.1) * 0.01;
+    float s = (mouseX - (width * 0.5)) / width; // sin(tick * 0.1) * 0.01;
 
-    update();
+    // update();
 
-    /// background(32, 32, 32, 32);
+    background(32, 32, 32, 32);
 
     pushMatrix();
     translate(width * 0.5, 0, -(width * 0.2));
-    rotate(s, 0, 1, 0);
+    rotate(HALF_PI, 0, s, 0);
     translate(width * -0.5, 0, 0);
     noFill();
     // loadPixels();
