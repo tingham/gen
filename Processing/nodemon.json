@@ -1,0 +1,6 @@
+{
+    "verbose": true,
+    "execMap": {
+        "pde": "processing-java --output=/tmp/processing --run --force"
+    }
+}
