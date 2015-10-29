@@ -28,3 +28,7 @@ DerivedData
 Processing/*.js
 Processing/libraries/*
 Fonts
+*~*
+/.*
+._*
+.un~

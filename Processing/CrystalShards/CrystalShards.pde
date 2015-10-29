@@ -13,7 +13,7 @@ int[] offsets = new int[] {-1, -width, -width + 1};
 
 void setup ()
 {
-	size(width, height, P3D);
+	size(850, 1100, P3D);
 
 	noiseDetail(8, 0.5);
 

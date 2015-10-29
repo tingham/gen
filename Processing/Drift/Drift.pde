@@ -12,6 +12,7 @@ int height = (int)(11.0 * resolution);
 int tick = 0;
 
 String outputName = "data/output/" + System.currentTimeMillis() + "/";
+String inputName= "data/input/kittens.jpg";
 
 Dot[] dots;
 
@@ -64,6 +65,10 @@ void generate ()
 {
 	background(128);
 	noStroke();
+
+    PImage img = loadImage(inputName);
+    image(img, 0, 0);
+
 	for (int i = 0; i < random(minCircles, maxCircles); i++) {
 		fill(colors[(int)random(colors.length)]);
 		float x, y;
