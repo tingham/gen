@@ -37,6 +37,7 @@ void draw ()
 
 	background(32);
 
+	// TODO: Compartmentalize
 	for (AType atype: agent.primary) {
 		float cross = atan2(atype.midpointY - (height * 0.5), atype.midpointX - (width * 0.5));
 
@@ -151,6 +152,7 @@ void drawValueContacts (ArrayList<AType> list) {
 		float amountWidth = (atype.currentValue * (width * dimensionalFactor));
 		float amountHeight = (atype.currentValue * (height * dimensionalFactor));
 
+		// TODO the x and y are wrong here, we're like 75% short.
 		float cross = radians(degrees(atan2(atype.midpointY - originY, atype.midpointX - originX)));
 		float x = (cos(cross) * amountWidth) + originX;
 		float y = (sin(cross) * amountHeight) + originY;
@@ -182,6 +184,8 @@ void drawHeadingIndicator () {
 	// tracks the mouse position if the button is down.
 	if (mousePressed && mouseButton == LEFT) {
 		float cross = degrees(atan2(mouseY - halfHeight, mouseX - halfWidth)) - 90.0;
+
+		cross = cross - (float)((int)cross % (360 / agent.primary.size()));
 
 		agent.heading = atan2(mouseY - halfHeight, mouseX - halfWidth);
 
