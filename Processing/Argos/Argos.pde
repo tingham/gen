@@ -28,7 +28,7 @@ int[][] offsets = new int[][] {
 
 void setup ()
 {
-	size(width, height, P3D);
+	size(1024, 1024, P3D);
 	generate();
 	thread("update");
 }
@@ -276,4 +276,3 @@ void draw ()
 	}
 	*/
 }
-

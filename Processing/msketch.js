@@ -28,14 +28,16 @@ if (sketchName === undefined) {
 	}
 }
 
-template = '// # MyProcessingSketch' + "\n";
+template = '// # ' + sketchName + "\n";
 template += '// **Created By:** + ' + process.env.USER + "\n";
 template += '// **Created On:** + ' + today.toDateString() + "\n";
 template += '// ' + "\n\n";
-template += "int width = 512;\nint height = 512;\nint tick = 0;\n";
+template += "int tick = 0;\n";
 template += 'String outputName = "data/output/" + System.currentTimeMillis() + "/";' + "\n\n";
 template += "void setup ()\n";
 template += "{\n";
+template += "  // P3D, P2D \n";
+template += "  size(512, 512, P2D);\n";
 template += "}\n\n";
 template += "void draw ()\n";
 template += "{\n";

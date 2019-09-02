@@ -13,9 +13,9 @@ int[] colors;
 
 void setup ()
 {
-    size(width, height, P2D);
+    size(512, 512, P2D);
 
-    int count = (width  / sqSize) * (height / sqSize);
+    int count = (512  / sqSize) * (512 / sqSize);
 
     colors = new int[count];
 
@@ -77,4 +77,3 @@ void swap (int a, int b)
     colors[a] = colors[b];
     colors[b] = d0;
 }
-
